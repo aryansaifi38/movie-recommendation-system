@@ -42,7 +42,7 @@ movies = pd.DataFrame(movie_dict)
 # Load similarity.pkl from Google Drive
 similarity_path = os.path.join(base_path, 'similarity.pkl')
 if not os.path.exists(similarity_path):
-    file_id = 'https://drive.google.com/file/d/1dmAE4iy9XBfBGxIswb42W2zcK3Dv33ub/view?usp=sharing'  # 🔁 Replace with your Google Drive file ID
+    file_id = '1dmAE4iy9XBfBGxIswb42W2zcK3Dv33ub'  # 🔁 Replace with your Google Drive file ID
     url = f'https://drive.google.com/uc?id={file_id}'
     gdown.download(url, similarity_path, quiet=False)
 
