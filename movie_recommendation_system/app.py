@@ -2,13 +2,17 @@ import streamlit as st
 import pandas as pd
 import pickle
 import requests
+import os
 
 # Function to fetch movie poster from TMDB
 def fetch_poster(movie_id):
-    url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=bdcfdff8a708cba2d3370562375c2a36&language=en-US"
-    response = requests.get(url)
-    data = response.json()
-    return "https://image.tmdb.org/t/p/w500" + data['poster_path']
+    try:
+        url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=bdcfdff8a708cba2d3370562375c2a36&language=en-US"
+        response = requests.get(url)
+        data = response.json()
+        return "https://image.tmdb.org/t/p/w500" + data['poster_path']
+    except:
+        return "https://via.placeholder.com/150x225?text=No+Image"
 
 # Function to recommend movies based on similarity
 def recommend(movie):
@@ -24,11 +28,20 @@ def recommend(movie):
         recommended_movie_posters.append(fetch_poster(movie_id))
     return recommended_movies, recommended_movie_posters
 
-# Load the movie data and similarity matrix
-movie_dict = pickle.load(open('movie_dict.pkl', 'rb'))
-movies = pd.DataFrame(movie_dict)
+# Get the base path of the app.py file
+base_path = os.path.dirname(os.path.abspath(__file__))
 
-similarity = pickle.load(open('similarity.pkl', 'rb'))
+# Load the movie data and similarity matrix
+movie_dict_path = os.path.join(base_path, 'movie_dict.pkl')
+similarity_path = os.path.join(base_path, 'similarity.pkl')
+
+with open(movie_dict_path, 'rb') as f:
+    movie_dict = pickle.load(f)
+
+with open(similarity_path, 'rb') as f:
+    similarity = pickle.load(f)
+
+movies = pd.DataFrame(movie_dict)
 
 # Streamlit UI
 st.title('🎬 Movie Recommendation System')
@@ -38,20 +51,8 @@ option = st.selectbox('Select a movie to get recommendations:', movies['title'].
 if st.button('Recommend Movie'):
     names, posters = recommend(option)
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    with col1:
-        st.text(names[0])
-        st.image(posters[0])
-    with col2:
-        st.text(names[1])
-        st.image(posters[1])
-    with col3:
-        st.text(names[2])
-        st.image(posters[2])
-    with col4:
-        st.text(names[3])
-        st.image(posters[3])
-    with col5:
-        st.text(names[4])
-        st.image(posters[4])
+    cols = st.columns(5)
+    for idx in range(5):
+        with cols[idx]:
+            st.text(names[idx])
+            st.image(posters[idx])
