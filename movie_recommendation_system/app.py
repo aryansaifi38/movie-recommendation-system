@@ -3,6 +3,7 @@ import pandas as pd
 import pickle
 import requests
 import os
+import gdown
 
 # Function to fetch movie poster from TMDB
 def fetch_poster(movie_id):
@@ -28,20 +29,26 @@ def recommend(movie):
         recommended_movie_posters.append(fetch_poster(movie_id))
     return recommended_movies, recommended_movie_posters
 
-# Get the base path of the app.py file
+# Base path
 base_path = os.path.dirname(os.path.abspath(__file__))
 
-# Load the movie data and similarity matrix
+# Load movie_dict.pkl from local
 movie_dict_path = os.path.join(base_path, 'movie_dict.pkl')
-similarity_path = os.path.join(base_path, 'similarity.pkl')
-
 with open(movie_dict_path, 'rb') as f:
     movie_dict = pickle.load(f)
 
+movies = pd.DataFrame(movie_dict)
+
+# Load similarity.pkl from Google Drive
+similarity_path = os.path.join(base_path, 'similarity.pkl')
+if not os.path.exists(similarity_path):
+    file_id = 'https://drive.google.com/file/d/1dmAE4iy9XBfBGxIswb42W2zcK3Dv33ub/view?usp=sharing'  # 🔁 Replace with your Google Drive file ID
+    url = f'https://drive.google.com/uc?id={file_id}'
+    gdown.download(url, similarity_path, quiet=False)
+
+# Load the similarity matrix
 with open(similarity_path, 'rb') as f:
     similarity = pickle.load(f)
-
-movies = pd.DataFrame(movie_dict)
 
 # Streamlit UI
 st.title('🎬 Movie Recommendation System')
